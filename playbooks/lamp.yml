@@ -14,9 +14,9 @@
       with_items:
         - apache2
         - mysql-server
-        - php5
-        - php5-mysql
-        - libapache2-mod-php5
+        - php
+        - php-mysql
+        - libapache2-mod-php
 
     - name: Copy over files into web directory.
       become: yes

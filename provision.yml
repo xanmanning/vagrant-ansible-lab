@@ -10,5 +10,25 @@
       become_method: sudo
       apt: upgrade=dist update_cache=yes
 
+    - name: Add Vagrant User
+      become: yes
+      become_method: sudo
+      user: name='vagrant' append=yes groups=sudo shell=/bin/bash state=present
+
+    - name: Set sudo group to NOPASSWD
+      become: yes
+      become_method: sudo
+      lineinfile:
+        dest=/etc/sudoers
+        regexp='^%sudo\s'
+        line="%sudo ALL=(ALL) NOPASSWD{{':'}} ALL"
+        validate='visudo -cf %s'
+        state=present
+
     - name: Insert (bad) Ansible Key
-      authorized_key: user="vagrant" key="{{ lookup('file', ansible_pub_key) }}" state=present
+      become: yes
+      become_method: sudo
+      authorized_key:
+        user='vagrant'
+        key="{{ lookup('file', ansible_pub_key) }}"
+        state=present
