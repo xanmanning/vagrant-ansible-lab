@@ -1,0 +1,14 @@
+---
+- name: Set Vim as Default Editor
+  hosts: vagrants
+  tasks:
+    - name: Update Alternatives
+      become: yes
+      become_method: sudo
+      alternatives: name=editor path=/usr/bin/vim
+
+    - name: Clear Selected Editor
+      file: path=/home/vagrant/.selected_editor state=absent
+
+    - name: Change Selected Editor
+      lineinfile: dest=~/.selected_editor state=present create=yes line='SELECTED_EDITOR="/usr/bin/vim"'

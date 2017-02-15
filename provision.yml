@@ -1,0 +1,14 @@
+---
+- name: Provision OS
+  hosts: all
+  vars:
+    - ansible_key: assets/ansible_rsa
+    - ansible_pub_key: assets/ansible_rsa.pub
+  tasks:
+    - name: Upgrade OS
+      become: yes
+      become_method: sudo
+      apt: upgrade=dist update_cache=yes
+
+    - name: Insert (bad) Ansible Key
+      authorized_key: user="vagrant" key="{{ lookup('file', ansible_pub_key) }}" state=present

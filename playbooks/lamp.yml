@@ -1,0 +1,27 @@
+---
+- name: Create LAMP Server
+  hosts: vagrants
+  tasks:
+    - name: Update package manager
+      become: yes
+      become_method: sudo
+      apt: update_cache=yes
+
+    - name: Install a LAMP stack
+      become: yes
+      become_method: sudo
+      apt: name={{ item }} state=present
+      with_items:
+        - apache2
+        - mysql-server
+        - php5
+        - php5-mysql
+        - libapache2-mod-php5
+
+    - name: Copy over files into web directory.
+      become: yes
+      become_method: sudo
+      copy: src={{ item.src }} dest={{ item.dest }}
+      with_items:
+        - { src: ../assets/index.html, dest: /var/www/html/index.html }
+        - { src: ../assets/phpinfo.php, dest: /var/www/html/phpinfo.php }

@@ -1,0 +1,7 @@
+# This is an example ansible file
+# - Xan
+
+[vagrants]
+10.8.10.10 		ansible_ssh_user=vagrant
+10.8.10.11 		ansible_ssh_user=vagrant
+10.8.10.12 		ansible_ssh_user=vagrant

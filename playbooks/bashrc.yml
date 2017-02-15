@@ -1,0 +1,11 @@
+---
+- name: Change the .bashrc to default
+  hosts: vagrants
+  tasks:
+    - name: Set the root bashrc
+      become: yes
+      become_method: sudo
+      copy: src=../assets/dotbashrc_root dest=/root/.bashrc owner=root group=root mode=0600
+
+    - name: Set the user bashrc
+      copy: src=../assets/dotbashrc dest=/home/vagrant/.bashrc owner=vagrant group=vagrant mode=0600
