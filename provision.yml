@@ -4,31 +4,73 @@
   vars:
     - ansible_key: assets/ansible_rsa
     - ansible_pub_key: assets/ansible_rsa.pub
+    - config_files:
+        - src: assets/ansible.cfg
+          dest: /etc/ansible/ansible.cfg
+        - src: inventory.yml
+          dest: /etc/ansible/inventory.yml
   tasks:
     - name: Upgrade OS
       become: yes
-      become_method: sudo
-      apt: upgrade=dist update_cache=yes
+      apt:
+        upgrade: dist
+        update_cache: yes
 
     - name: Add Vagrant User
       become: yes
-      become_method: sudo
-      user: name='vagrant' append=yes groups=sudo shell=/bin/bash state=present
+      user:
+        name: 'vagrant'
+        password: $6$tK4wPsqL$MrLN4lMwGDLpvr28aYWOnqDKvEjZPY4b4BiTKDZITnpzj/Og.vtpL1LJ9yo3y3PrpGMxVfT9fmOJ.t4RU0E0U1
+        append: yes
+        groups: sudo
+        shell: /bin/bash
+        state: present
+
+    - name: Make .ssh directory for Vagrant user
+      become: yes
+      file:
+        path: /home/vagrant/.ssh
+        state: directory
+        mode: 0700
+
+    - name: Add Ansible Private key to Vagrant user
+      become: yes
+      copy:
+        src: "{{ ansible_key }}"
+        dest: /home/vagrant/.ssh/id_rsa
+        owner: vagrant
+        mode: 0600
+
+    - name: Make Ansible config directory
+      become: yes
+      file:
+        path: /etc/ansible
+        state: directory
+        mode: 0755
+
+    - name: Add Ansible config to host
+      become: yes
+      copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        mode: 0644
+      with_items:
+        "{{ config_files }}"
+      when:
+        inventory_hostname == "node0"
 
     - name: Set sudo group to NOPASSWD
       become: yes
-      become_method: sudo
       lineinfile:
-        dest=/etc/sudoers
-        regexp='^%sudo\s'
-        line="%sudo ALL=(ALL) NOPASSWD{{':'}} ALL"
-        validate='visudo -cf %s'
-        state=present
+        dest: /etc/sudoers
+        regexp: '^%sudo\s'
+        line: "%sudo ALL=(ALL) NOPASSWD{{':'}} ALL"
+        validate: 'visudo -cf %s'
+        state: present
 
     - name: Insert (bad) Ansible Key
       become: yes
-      become_method: sudo
       authorized_key:
-        user='vagrant'
-        key="{{ lookup('file', ansible_pub_key) }}"
-        state=present
+        user: 'vagrant'
+        key: "{{ lookup('file', ansible_pub_key) }}"
+        state: present
